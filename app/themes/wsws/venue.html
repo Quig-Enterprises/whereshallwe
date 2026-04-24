@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}{{ venue.name }} &mdash; Where Shall We Ski{% endblock %}
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<style>
+  .venue-detail { padding: 2rem 0; }
+  .back-link { color: var(--text-muted); font-size: 0.82rem; margin-bottom: 1.5rem; display: inline-block; }
+  .back-link:hover { color: var(--alpine); }
+  .venue-name { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2rem, 5vw, 3.5rem); color: var(--alpine); letter-spacing: 0.04em; margin: 0 0 0.25rem; line-height: 1; }
+  .venue-location { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
+  .stats-row { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; }
+  .stat-box { background: var(--bg-card); border-radius: var(--radius); padding: 1rem 1.25rem; border: 1px solid rgba(192,57,43,0.2); text-align: center; min-width: 100px; }
+  .stat-box .val { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--accent-light); letter-spacing: 0.03em; line-height: 1; }
+  .stat-box .lbl { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .venue-body { display: grid; grid-template-columns: 1fr 280px; gap: 2rem; }
+  @media (max-width: 700px) { .venue-body { grid-template-columns: 1fr; } }
+  .info-card { background: var(--bg-card); border-radius: var(--radius); padding: 1.15rem; border: 1px solid rgba(192,57,43,0.12); margin-bottom: 1rem; }
+  .info-card h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; color: var(--accent-light); letter-spacing: 0.06em; text-transform: uppercase; margin: 0 0 0.75rem; }
+  .info-row { display: flex; gap: 0.75rem; align-items: flex-start; margin-bottom: 0.4rem; font-size: 0.88rem; }
+  .info-row .label { color: var(--text-muted); min-width: 100px; }
+  .btn-link { display: inline-block; padding: 0.4rem 0.9rem; border: 1px solid rgba(192,57,43,0.4); border-radius: 20px; font-size: 0.82rem; color: var(--text-muted); transition: all 0.2s; }
+  .btn-link:hover { background: var(--accent); color: white; border-color: var(--accent); }
+  .snow-badge { display: inline-flex; align-items: center; gap: 0.3rem; background: var(--accent); color: white; font-weight: 700; font-size: 0.85rem; padding: 0.2rem 0.6rem; border-radius: 4px; margin-left: 0.5rem; }
+  canvas { max-width: 100%; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container venue-detail">
+  <a class="back-link" href="/venues">&larr; All ski hills</a>
+
+  <h1 class="venue-name">{{ venue.name }}{% if venue.snow_depth_in %}<span class="snow-badge">{{ venue.snow_depth_in }}"</span>{% endif %}</h1>
+  <div class="venue-location">{{ venue.city }}{% if venue.state %}, {{ venue.state }}{% endif %}{% if venue.address %} &mdash; {{ venue.address }}{% endif %}</div>
+
+  <div class="stats-row">
+    {% if venue.vertical_drop_ft %}
+    <div class="stat-box"><div class="val">{{ venue.vertical_drop_ft }}'</div><div class="lbl">Vertical Drop</div></div>
+    {% endif %}
+    {% if venue.trail_count %}
+    <div class="stat-box"><div class="val">{{ venue.trail_count }}</div><div class="lbl">Trails</div></div>
+    {% endif %}
+    {% if venue.lift_count %}
+    <div class="stat-box"><div class="val">{{ venue.lift_count }}</div><div class="lbl">Lifts</div></div>
+    {% endif %}
+    {% if venue.summit_elevation_ft %}
+    <div class="stat-box"><div class="val">{{ venue.summit_elevation_ft }}'</div><div class="lbl">Summit</div></div>
+    {% endif %}
+  </div>
+
+  <div class="venue-body">
+    <div>
+      {% if venue.description %}
+      <div class="info-card">
+        <h3>About</h3>
+        <p style="color:var(--text-muted);line-height:1.6;font-size:0.9rem">{{ venue.description }}</p>
+      </div>
+      {% endif %}
+
+      {% if conditions %}
+      <div class="info-card">
+        <h3>Snow Depth History</h3>
+        <canvas id="snowChart" height="120"></canvas>
+        <script>
+          const ctx = document.getElementById('snowChart').getContext('2d');
+          new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: {{ conditions | map(attribute='reported_at') | list | tojson }},
+              datasets: [{
+                label: 'Snow Depth (in)',
+                data: {{ conditions | map(attribute='snow_depth_in') | list | tojson }},
+                borderColor: '#c0392b',
+                backgroundColor: 'rgba(192,57,43,0.1)',
+                tension: 0.3,
+                fill: true,
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: { legend: { display: false } },
+              scales: { y: { beginAtZero: true, ticks: { color: '#8fa6bb' }, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { ticks: { color: '#8fa6bb', maxTicksLimit: 6 }, grid: { display: false } } }
+            }
+          });
+        </script>
+      </div>
+      {% endif %}
+    </div>
+    <div>
+      {% if venue.season_opens or venue.season_closes %}
+      <div class="info-card">
+        <h3>Season</h3>
+        {% if venue.season_opens %}<div class="info-row"><span class="label">Opens</span>{{ venue.season_opens }}</div>{% endif %}
+        {% if venue.season_closes %}<div class="info-row"><span class="label">Closes</span>{{ venue.season_closes }}</div>{% endif %}
+      </div>
+      {% endif %}
+      <div class="info-card">
+        <h3>Contact</h3>
+        {% if venue.phone %}<div class="info-row"><span class="label">Phone</span><a href="tel:{{ venue.phone }}">{{ venue.phone }}</a></div>{% endif %}
+        {% if venue.website %}<div class="info-row"><span class="label">Web</span><a href="{{ venue.website }}" target="_blank" rel="noopener">Visit site</a></div>{% endif %}
+        {% if venue.terrain_url %}<div class="info-row"><span class="label">Trail Map</span><a href="{{ venue.terrain_url }}" target="_blank" rel="noopener">View map</a></div>{% endif %}
+      </div>
+      {% if venue.lat and venue.lng %}
+      <div class="info-card">
+        <h3>Directions</h3>
+        <a class="btn-link" href="https://maps.google.com/?q={{ venue.lat }},{{ venue.lng }}" target="_blank" rel="noopener">Open in Maps</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

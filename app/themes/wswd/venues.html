@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Dance Venues &mdash; Where Shall We Dance{% endblock %}
+{% block head %}
+<style>
+  .venues-page { padding: 2rem 0; }
+  .filters { background: var(--bg-card); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 2rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; border: 1px solid rgba(212,168,67,0.1); }
+  .filter-group { display: flex; flex-direction: column; gap: 0.35rem; }
+  .filter-group label { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+  .filter-group input, .filter-group select { padding: 0.5rem 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(212,168,67,0.2); border-radius: var(--radius); color: var(--text); font-size: 0.9rem; }
+  .filter-group input:focus, .filter-group select:focus { outline: none; border-color: var(--accent); }
+  .filter-group select option { background: var(--bg-card); }
+  .btn-search { padding: 0.55rem 1.25rem; background: var(--accent); color: #1a0a2e; border: none; border-radius: var(--radius); font-weight: 600; cursor: pointer; }
+  .venue-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+  .venue-card { background: var(--bg-card); border-radius: var(--radius); overflow: hidden; border: 1px solid rgba(212,168,67,0.1); transition: border-color 0.2s, transform 0.2s; }
+  .venue-card:hover { border-color: rgba(212,168,67,0.4); transform: translateY(-2px); }
+  .venue-card-photo { height: 140px; background: linear-gradient(135deg, #2d0a4e, #1a0a2e); display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 2rem; }
+  .venue-card-body { padding: 1rem; }
+  .venue-card-name { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; color: var(--text); margin: 0 0 0.2rem; }
+  .venue-card-city { font-size: 0.82rem; color: var(--text-muted); margin: 0 0 0.5rem; }
+  .venue-card-cats { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+  .cat-tag { font-size: 0.72rem; padding: 0.12rem 0.45rem; background: rgba(212,168,67,0.12); color: var(--accent); border-radius: 12px; }
+  .results-count { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem; }
+  .empty { text-align: center; padding: 4rem 2rem; color: var(--text-muted); }
+  .page-title { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; color: var(--accent); margin-bottom: 1.5rem; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container venues-page">
+  <h1 class="page-title">Dance Venues</h1>
+  <form class="filters" method="get" action="/venues">
+    <div class="filter-group">
+      <label>Search</label>
+      <input type="text" name="q" value="{{ q or '' }}" placeholder="Name, city...">
+    </div>
+    <div class="filter-group">
+      <label>City</label>
+      <input type="text" name="city" value="{{ city or '' }}" placeholder="Jacksonville...">
+    </div>
+    <div class="filter-group">
+      <label>State</label>
+      <input type="text" name="state" value="{{ state or '' }}" placeholder="FL" style="width:80px">
+    </div>
+    <div class="filter-group">
+      <label>Category</label>
+      <select name="category">
+        <option value="">All</option>
+        <option value="dance-studio" {{ 'selected' if category == 'dance-studio' }}>Dance Studio</option>
+        <option value="bar" {{ 'selected' if category == 'bar' }}>Bar</option>
+        <option value="event-venue" {{ 'selected' if category == 'event-venue' }}>Event Venue</option>
+        <option value="night-club" {{ 'selected' if category == 'night-club' }}>Night Club</option>
+        <option value="restaurant" {{ 'selected' if category == 'restaurant' }}>Restaurant</option>
+        <option value="social-club" {{ 'selected' if category == 'social-club' }}>Social Club</option>
+      </select>
+    </div>
+    <button class="btn-search" type="submit">Search</button>
+  </form>
+
+  {% if venues %}
+  <p class="results-count">{{ venues | length }} venue{{ 's' if venues | length != 1 }} found</p>
+  <div class="venue-grid">
+    {% for v in venues %}
+    <a href="/venue/{{ v.slug }}" style="text-decoration:none">
+      <article class="venue-card">
+        <div class="venue-card-photo">&#128131;</div>
+        <div class="venue-card-body">
+          <h3 class="venue-card-name">{{ v.name }}</h3>
+          <p class="venue-card-city">{{ v.city }}{% if v.state %}, {{ v.state }}{% endif %}</p>
+          {% if v.categories %}
+          <div class="venue-card-cats">
+            {% for cat in v.categories[:3] %}
+            <span class="cat-tag">{{ cat | replace('-', ' ') | title }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+      </article>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty">
+    <p style="font-size:2rem">&#128131;</p>
+    <p>No venues found. Try a different search.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}{{ venue.name }} &mdash; Where Shall We Dance{% endblock %}
+{% block head %}
+<style>
+  .venue-detail { padding: 2rem 0; }
+  .back-link { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem; display: inline-block; }
+  .back-link:hover { color: var(--accent); }
+  .venue-header { display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: start; margin-bottom: 2rem; }
+  .venue-name { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 4vw, 3rem); color: var(--accent); margin: 0 0 0.5rem; }
+  .venue-location { color: var(--text-muted); font-size: 1rem; }
+  .venue-cats { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
+  .cat-tag { font-size: 0.82rem; padding: 0.2rem 0.6rem; background: rgba(212,168,67,0.15); color: var(--accent); border-radius: 14px; }
+  .venue-body { display: grid; grid-template-columns: 1fr 300px; gap: 2rem; }
+  @media (max-width: 700px) { .venue-body { grid-template-columns: 1fr; } .venue-header { grid-template-columns: 1fr; } }
+  .info-card { background: var(--bg-card); border-radius: var(--radius); padding: 1.25rem; border: 1px solid rgba(212,168,67,0.1); margin-bottom: 1rem; }
+  .info-card h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--accent); margin: 0 0 0.75rem; }
+  .info-row { display: flex; gap: 0.75rem; align-items: flex-start; margin-bottom: 0.5rem; font-size: 0.9rem; }
+  .info-row .label { color: var(--text-muted); min-width: 70px; }
+  .social-links { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .social-btn { padding: 0.35rem 0.85rem; border: 1px solid rgba(212,168,67,0.3); border-radius: 20px; font-size: 0.82rem; color: var(--text-muted); transition: all 0.2s; }
+  .social-btn:hover { background: var(--accent); color: #1a0a2e; border-color: var(--accent); }
+  .rating-display { font-size: 1.3rem; color: var(--accent); }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container venue-detail">
+  <a class="back-link" href="/venues">&larr; Back to venues</a>
+
+  <div class="venue-header">
+    <div>
+      <h1 class="venue-name">{{ venue.name }}</h1>
+      <div class="venue-location">{{ venue.address }}{% if venue.city %}, {{ venue.city }}{% endif %}{% if venue.state %}, {{ venue.state }}{% endif %}{% if venue.zip %} {{ venue.zip }}{% endif %}</div>
+      {% if venue.categories %}
+      <div class="venue-cats">
+        {% for cat in venue.categories %}
+        <span class="cat-tag">{{ cat | replace('-', ' ') | title }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    {% if venue.avg_rating %}
+    <div style="text-align:center">
+      <div class="rating-display">&#9733; {{ "%.1f"|format(venue.avg_rating) }}</div>
+      {% if venue.rating_count %}<div style="font-size:0.8rem;color:var(--text-muted)">{{ venue.rating_count }} ratings</div>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="venue-body">
+    <div>
+      {% if venue.description %}
+      <div class="info-card">
+        <h3>About</h3>
+        <p style="color:var(--text-muted);line-height:1.6">{{ venue.description }}</p>
+      </div>
+      {% endif %}
+    </div>
+    <div>
+      <div class="info-card">
+        <h3>Contact</h3>
+        {% if venue.phone %}
+        <div class="info-row"><span class="label">Phone</span><a href="tel:{{ venue.phone }}">{{ venue.phone }}</a></div>
+        {% endif %}
+        {% if venue.email %}
+        <div class="info-row"><span class="label">Email</span><a href="mailto:{{ venue.email }}">{{ venue.email }}</a></div>
+        {% endif %}
+        {% if venue.website %}
+        <div class="info-row"><span class="label">Web</span><a href="{{ venue.website }}" target="_blank" rel="noopener">Visit website</a></div>
+        {% endif %}
+      </div>
+      {% if venue.facebook_url or venue.twitter_handle %}
+      <div class="info-card">
+        <h3>Social</h3>
+        <div class="social-links">
+          {% if venue.facebook_url %}<a class="social-btn" href="{{ venue.facebook_url }}" target="_blank" rel="noopener">Facebook</a>{% endif %}
+          {% if venue.twitter_handle %}<a class="social-btn" href="https://twitter.com/{{ venue.twitter_handle }}" target="_blank" rel="noopener">Twitter</a>{% endif %}
+        </div>
+      </div>
+      {% endif %}
+      {% if venue.lat and venue.lng %}
+      <div class="info-card">
+        <h3>Directions</h3>
+        <a href="https://maps.google.com/?q={{ venue.lat }},{{ venue.lng }}" target="_blank" rel="noopener" class="social-btn" style="display:inline-block">Open in Maps</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

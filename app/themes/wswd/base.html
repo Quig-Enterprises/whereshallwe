@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Where Shall We Dance{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ request.url_for('static', path='shared/reset.css') }}">
+  <style>
+    :root {
+      --bg: #1a0a2e;
+      --bg-card: #2a1348;
+      --accent: #d4a843;
+      --accent-light: #e8c56a;
+      --text: #f0e8d8;
+      --text-muted: #b8a89a;
+      --radius: 8px;
+    }
+    * { box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; margin: 0; min-height: 100vh; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: var(--accent-light); }
+    .site-header { background: rgba(26,10,46,0.95); border-bottom: 1px solid rgba(212,168,67,0.2); padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(8px); }
+    .site-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; color: var(--accent); font-weight: 600; letter-spacing: 0.02em; }
+    nav { display: flex; gap: 1.5rem; }
+    nav a { font-size: 0.9rem; font-weight: 500; color: var(--text-muted); transition: color 0.2s; }
+    nav a:hover { color: var(--accent); }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+    .site-footer { background: rgba(0,0,0,0.4); border-top: 1px solid rgba(212,168,67,0.15); padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-top: 4rem; }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="site-header">
+    <a class="site-logo" href="/">Where Shall We Dance</a>
+    <nav>
+      <a href="/venues?category=dance-studio">Studios</a>
+      <a href="/venues?category=event-venue">Events</a>
+      <a href="/map">Map</a>
+      <a href="/venues?category=bar">Social Dances</a>
+      <a href="/about">About</a>
+    </nav>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <p>&copy; {{ now.year if now is defined else 2025 }} Where Shall We Dance &mdash; Find your next dance venue</p>
+  </footer>
+</body>
+</html>

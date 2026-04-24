@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Where Shall We Ski &mdash; Midwest Ski Hill Guide{% endblock %}
+{% block head %}
+<style>
+  .hero { background: linear-gradient(180deg, #0d1b2a 0%, #1a2f44 60%, #0d1b2a 100%); padding: 4rem 2rem; text-align: center; border-bottom: 2px solid var(--accent); }
+  .hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(3rem, 8vw, 6rem); color: var(--alpine); letter-spacing: 0.03em; margin: 0 0 0.5rem; line-height: 1; }
+  .hero h1 span { color: var(--accent); }
+  .hero p { font-size: 1.05rem; color: var(--text-muted); max-width: 480px; margin: 0 auto 2rem; }
+  .snow-badge { display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(192,57,43,0.15); border: 1px solid var(--accent); border-radius: 20px; padding: 0.3rem 0.8rem; font-size: 0.82rem; color: var(--accent-light); font-weight: 600; }
+  .section { padding: 3rem 0; }
+  .section-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: var(--alpine); margin-bottom: 1.5rem; letter-spacing: 0.04em; border-left: 4px solid var(--accent); padding-left: 0.75rem; }
+  .resort-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.25rem; }
+  .resort-card { background: var(--bg-card); border-radius: var(--radius); overflow: hidden; border: 1px solid rgba(192,57,43,0.15); transition: border-color 0.2s, transform 0.2s; }
+  .resort-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .resort-card-img { height: 150px; background: linear-gradient(135deg, #162436, #0d1b2a); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; position: relative; }
+  .snow-depth-badge { position: absolute; top: 0.5rem; right: 0.5rem; background: var(--accent); color: white; font-weight: 700; font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 4px; }
+  .resort-card-body { padding: 1rem; }
+  .resort-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; color: var(--alpine); letter-spacing: 0.03em; margin: 0 0 0.25rem; }
+  .resort-location { font-size: 0.82rem; color: var(--text-muted); margin: 0 0 0.5rem; }
+  .resort-stats { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.5rem; }
+  .stat { font-size: 0.78rem; color: var(--text-muted); }
+  .stat strong { color: var(--text); }
+  .state-groups { }
+  .state-group { margin-bottom: 2rem; }
+  .state-heading { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 1px solid rgba(192,57,43,0.2); padding-bottom: 0.4rem; margin-bottom: 1rem; }
+</style>
+{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>WHERE SHALL WE <span>SKI?</span></h1>
+  <p>Ski hill conditions, trail maps, and resort guides for the Midwest and beyond.</p>
+</section>
+
+<div class="container">
+  {% if featured %}
+  <section class="section">
+    <h2 class="section-title">Featured Resorts</h2>
+    <div class="resort-grid">
+      {% for v in featured %}
+      <a href="/venue/{{ v.slug }}" style="text-decoration:none">
+        <article class="resort-card">
+          <div class="resort-card-img">&#9975;
+            {% if v.snow_depth_in %}<span class="snow-depth-badge">{{ v.snow_depth_in }}"</span>{% endif %}
+          </div>
+          <div class="resort-card-body">
+            <h3 class="resort-name">{{ v.name }}</h3>
+            <div class="resort-location">{{ v.city }}{% if v.state %}, {{ v.state }}{% endif %}</div>
+            <div class="resort-stats">
+              {% if v.vertical_drop_ft %}<span class="stat"><strong>{{ v.vertical_drop_ft }}'</strong> vert</span>{% endif %}
+              {% if v.trail_count %}<span class="stat"><strong>{{ v.trail_count }}</strong> trails</span>{% endif %}
+              {% if v.lift_count %}<span class="stat"><strong>{{ v.lift_count }}</strong> lifts</span>{% endif %}
+            </div>
+          </div>
+        </article>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if venues_by_state %}
+  <section class="section">
+    <h2 class="section-title">All Ski Hills</h2>
+    <div class="state-groups">
+      {% for state, resorts in venues_by_state.items() %}
+      <div class="state-group">
+        <div class="state-heading">{{ state }}</div>
+        <div class="resort-grid">
+          {% for v in resorts %}
+          <a href="/venue/{{ v.slug }}" style="text-decoration:none">
+            <article class="resort-card">
+              <div class="resort-card-img">&#9975;
+                {% if v.snow_depth_in %}<span class="snow-depth-badge">{{ v.snow_depth_in }}"</span>{% endif %}
+              </div>
+              <div class="resort-card-body">
+                <h3 class="resort-name">{{ v.name }}</h3>
+                <div class="resort-location">{{ v.city }}{% if v.city %}, {% endif %}{{ v.state }}</div>
+                <div class="resort-stats">
+                  {% if v.vertical_drop_ft %}<span class="stat"><strong>{{ v.vertical_drop_ft }}'</strong> vert</span>{% endif %}
+                  {% if v.trail_count %}<span class="stat"><strong>{{ v.trail_count }}</strong> trails</span>{% endif %}
+                </div>
+              </div>
+            </article>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

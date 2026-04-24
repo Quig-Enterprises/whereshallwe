@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Where Shall We Dance &mdash; Find Dance Studios &amp; Venues{% endblock %}
+{% block head %}
+<style>
+  .hero { background: linear-gradient(135deg, #1a0a2e 0%, #2d0a4e 40%, #1a0a2e 100%); padding: 5rem 2rem; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 60% 40%, rgba(212,168,67,0.08) 0%, transparent 60%); pointer-events: none; }
+  .hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.5rem, 6vw, 4.5rem); color: var(--accent); margin: 0 0 1rem; line-height: 1.1; }
+  .hero p { font-size: 1.15rem; color: var(--text-muted); max-width: 520px; margin: 0 auto 2rem; }
+  .search-bar { display: flex; gap: 0.5rem; max-width: 500px; margin: 0 auto; }
+  .search-bar input { flex: 1; padding: 0.75rem 1rem; border-radius: var(--radius); border: 1px solid rgba(212,168,67,0.3); background: rgba(255,255,255,0.05); color: var(--text); font-size: 1rem; }
+  .search-bar input::placeholder { color: var(--text-muted); }
+  .search-bar input:focus { outline: none; border-color: var(--accent); }
+  .search-bar button { padding: 0.75rem 1.5rem; background: var(--accent); color: #1a0a2e; border: none; border-radius: var(--radius); font-weight: 600; cursor: pointer; transition: background 0.2s; }
+  .search-bar button:hover { background: var(--accent-light); }
+  .category-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; padding: 1.5rem 2rem; }
+  .pill { padding: 0.4rem 1rem; border-radius: 20px; border: 1px solid rgba(212,168,67,0.3); font-size: 0.85rem; color: var(--text-muted); transition: all 0.2s; }
+  .pill:hover { background: var(--accent); color: #1a0a2e; border-color: var(--accent); }
+  .section { padding: 3rem 0; }
+  .section-title { font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: var(--accent); margin-bottom: 1.5rem; }
+  .venue-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+  .venue-card { background: var(--bg-card); border-radius: var(--radius); overflow: hidden; border: 1px solid rgba(212,168,67,0.1); transition: border-color 0.2s, transform 0.2s; }
+  .venue-card:hover { border-color: rgba(212,168,67,0.4); transform: translateY(-2px); }
+  .venue-card-photo { height: 160px; background: linear-gradient(135deg, #2d0a4e, #1a0a2e); display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 2.5rem; }
+  .venue-card-body { padding: 1rem; }
+  .venue-card-name { font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; color: var(--text); margin: 0 0 0.25rem; }
+  .venue-card-city { font-size: 0.85rem; color: var(--text-muted); margin: 0 0 0.5rem; }
+  .venue-card-cats { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+  .cat-tag { font-size: 0.75rem; padding: 0.15rem 0.5rem; background: rgba(212,168,67,0.12); color: var(--accent); border-radius: 12px; }
+  .rating { font-size: 0.8rem; color: var(--accent); margin-top: 0.5rem; }
+</style>
+{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>Where Shall We Dance?</h1>
+  <p>Find dance studios, social dances, and live music venues near you.</p>
+  <form class="search-bar" action="/venues" method="get">
+    <input type="text" name="q" placeholder="Search venues, cities, styles..." autocomplete="off">
+    <button type="submit">Search</button>
+  </form>
+</section>
+
+<div class="category-pills container">
+  <a class="pill" href="/venues?category=dance-studio">Dance Studios</a>
+  <a class="pill" href="/venues?category=bar">Bars</a>
+  <a class="pill" href="/venues?category=event-venue">Event Venues</a>
+  <a class="pill" href="/venues?category=night-club">Night Clubs</a>
+  <a class="pill" href="/venues?category=restaurant">Restaurants</a>
+  <a class="pill" href="/venues?category=social-club">Social Clubs</a>
+</div>
+
+<div class="container">
+  {% if featured %}
+  <section class="section">
+    <h2 class="section-title">Featured Studios &amp; Venues</h2>
+    <div class="venue-grid">
+      {% for v in featured %}
+      <a href="/venue/{{ v.slug }}" style="text-decoration:none">
+        <article class="venue-card">
+          <div class="venue-card-photo">&#128131;</div>
+          <div class="venue-card-body">
+            <h3 class="venue-card-name">{{ v.name }}</h3>
+            <p class="venue-card-city">{{ v.city }}{% if v.state %}, {{ v.state }}{% endif %}</p>
+            {% if v.categories %}
+            <div class="venue-card-cats">
+              {% for cat in v.categories[:3] %}
+              <span class="cat-tag">{{ cat | replace('-', ' ') | title }}</span>
+              {% endfor %}
+            </div>
+            {% endif %}
+            {% if v.avg_rating %}
+            <div class="rating">&#9733; {{ "%.1f"|format(v.avg_rating) }}{% if v.rating_count %} ({{ v.rating_count }}){% endif %}</div>
+            {% endif %}
+          </div>
+        </article>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Where Shall We Ski{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ request.url_for('static', path='shared/reset.css') }}">
+  <style>
+    :root {
+      --bg: #0d1b2a;
+      --bg-card: #162436;
+      --accent: #c0392b;
+      --accent-light: #e74c3c;
+      --alpine: #f0f4f8;
+      --text: #e8edf2;
+      --text-muted: #8fa6bb;
+      --radius: 6px;
+    }
+    * { box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; min-height: 100vh; }
+    a { color: var(--accent-light); text-decoration: none; }
+    a:hover { color: var(--alpine); }
+    .site-header { background: rgba(13,27,42,0.97); border-bottom: 2px solid var(--accent); padding: 0 2rem; display: flex; align-items: stretch; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .site-logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: var(--alpine); letter-spacing: 0.04em; display: flex; align-items: center; padding: 0.75rem 0; }
+    .site-logo span { color: var(--accent); }
+    nav { display: flex; gap: 0; }
+    nav a { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; padding: 0 1.25rem; display: flex; align-items: center; border-bottom: 3px solid transparent; transition: all 0.2s; }
+    nav a:hover { color: var(--alpine); border-bottom-color: var(--accent); }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+    .site-footer { background: rgba(0,0,0,0.5); border-top: 2px solid var(--accent); padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.82rem; margin-top: 4rem; }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="site-header">
+    <a class="site-logo" href="/">WHERE SHALL WE <span>&nbsp;SKI</span></a>
+    <nav>
+      <a href="/venues">Ski Hills</a>
+      <a href="/map">Trail Maps</a>
+      <a href="/venues?category=snow-report">Snow Report</a>
+      <a href="/about">About</a>
+    </nav>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <p>&copy; {{ now.year if now is defined else 2025 }} Where Shall We Ski &mdash; Midwest &amp; Beyond Ski Hill Guide</p>
+  </footer>
+</body>
+</html>

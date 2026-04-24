@@ -1,0 +1,70 @@
+{
+  "Alpine Valley Resort|East Troy|WI": {
+    "lat": 42.7381877,
+    "lng": -88.429212
+  },
+  "Camp 10 Ski Area|Langlade County|WI": {
+    "lat": 45.3418,
+    "lng": -89.1693
+  },
+  "Cascade Mountain|Portage|WI": {
+    "lat": 43.4999066,
+    "lng": -89.5147391
+  },
+  "Granite Peak|Wausau|WI": {
+    "lat": 44.9292979,
+    "lng": -89.6831699
+  },
+  "Kettlebowl Ski Hill|Antigo|WI": {
+    "lat": 45.2712,
+    "lng": -88.9019
+  },
+  "Nordic Mountain|Wild Rose|WI": {
+    "lat": 44.18,
+    "lng": -89.2475
+  },
+  "Paul Bunyan Ski Hill|Lakewood|WI": {
+    "lat": 45.3261,
+    "lng": -88.5246
+  },
+  "Wilmot Mountain|Wilmot|WI": {
+    "lat": 42.5132,
+    "lng": -88.1819
+  },
+  "Blackjack Ski Resort|Bessemer|MI": {
+    "lat": 46.4667,
+    "lng": -90.0455
+  },
+  "Mount Bohemia|Mohawk|MI": {
+    "lat": 47.3911,
+    "lng": -88.0097
+  },
+  "Mont Ripley|Hancock|MI": {
+    "lat": 47.126714,
+    "lng": -88.5608029
+  },
+  "Porcupine Mountains|Ontonagon|MI": {
+    "lat": 46.7417805,
+    "lng": -89.8018301
+  },
+  "Ski Brule|Iron River|MI": {
+    "lat": 46.0284509,
+    "lng": -88.7055528
+  },
+  "Paoli Peaks|Paoli|IN": {
+    "lat": 38.548,
+    "lng": -86.4738
+  },
+  "Perfect North Slopes|Lawrenceburg|IN": {
+    "lat": 39.1471655,
+    "lng": -84.8872606
+  },
+  "Terry Peak Ski Area|Lead|SD": {
+    "lat": 44.3522,
+    "lng": -103.7652
+  },
+  "Ober Gatlinburg|Gatlinburg|TN": {
+    "lat": 35.7031855,
+    "lng": -83.5587502
+  }
+}
