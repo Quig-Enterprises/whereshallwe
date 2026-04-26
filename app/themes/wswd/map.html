@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block title %}Venue Map &mdash; Where Shall We Dance{% endblock %}
+{% block head %}
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+<style>
+  .map-page { display: flex; flex-direction: column; height: calc(100vh - 65px); }
+  .map-header { padding: 1rem 2rem 0.75rem; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; }
+  .map-title { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; color: var(--accent); margin: 0; }
+  .map-count { font-size: 0.85rem; color: var(--text-muted); }
+  #map { flex: 1; min-height: 0; }
+  .mapboxgl-popup-content {
+    background: #2a1348;
+    color: #f0e8d8;
+    border: 1px solid rgba(212,168,67,0.3);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    font-family: 'DM Sans', sans-serif;
+    min-width: 180px;
+    max-width: 240px;
+  }
+  .mapboxgl-popup-tip { border-top-color: #2a1348 !important; }
+  .popup-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #d4a843;
+    margin: 0 0 0.2rem;
+    line-height: 1.3;
+  }
+  .popup-location { font-size: 0.78rem; color: #b8a89a; margin: 0 0 0.4rem; }
+  .popup-cats { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-bottom: 0.5rem; }
+  .popup-cat { font-size: 0.68rem; padding: 0.1rem 0.4rem; background: rgba(212,168,67,0.12); color: #d4a843; border-radius: 10px; }
+  .popup-link { display: inline-block; font-size: 0.78rem; color: #d4a843; font-weight: 600; text-decoration: none; }
+  .popup-link:hover { color: #e8c56a; text-decoration: underline; }
+  .mapboxgl-ctrl-attrib { font-size: 0.65rem; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="map-page">
+  <div class="map-header">
+    <h1 class="map-title">Dance Venues Map</h1>
+    <span class="map-count" id="venue-count"></span>
+  </div>
+  <div id="map"></div>
+</div>
+<script>
+mapboxgl.accessToken = '{{ mapbox_token }}';
+
+const map = new mapboxgl.Map({
+  container: 'map',
+  style: 'mapbox://styles/mapbox/dark-v11',
+  center: [-87.6298, 41.8781],
+  zoom: 4,
+});
+
+map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+map.addControl(new mapboxgl.FullscreenControl(), 'top-right');
+
+const venues = {{ venues | tojson }};
+
+document.getElementById('venue-count').textContent =
+  venues.length + ' venue' + (venues.length !== 1 ? 's' : '');
+
+const popupEl = new mapboxgl.Popup({ closeButton: true, closeOnClick: false, maxWidth: '260px' });
+
+map.on('load', () => {
+  const features = venues
+    .filter(v => v.lat != null && v.lng != null)
+    .map(v => ({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [parseFloat(v.lng), parseFloat(v.lat)] },
+      properties: {
+        slug: v.slug,
+        name: v.name,
+        city: v.city,
+        state: v.state,
+        categories: v.categories || [],
+      }
+    }));
+
+  map.addSource('venues', {
+    type: 'geojson',
+    data: { type: 'FeatureCollection', features },
+    cluster: true,
+    clusterMaxZoom: 12,
+    clusterRadius: 40,
+  });
+
+  map.addLayer({
+    id: 'clusters',
+    type: 'circle',
+    source: 'venues',
+    filter: ['has', 'point_count'],
+    paint: {
+      'circle-color': '#d4a843',
+      'circle-radius': ['step', ['get', 'point_count'], 18, 5, 24, 15, 30],
+      'circle-opacity': 0.85,
+    }
+  });
+
+  map.addLayer({
+    id: 'cluster-count',
+    type: 'symbol',
+    source: 'venues',
+    filter: ['has', 'point_count'],
+    layout: {
+      'text-field': '{point_count_abbreviated}',
+      'text-size': 12,
+      'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+    },
+    paint: { 'text-color': '#1a0a2e' }
+  });
+
+  map.addLayer({
+    id: 'unclustered',
+    type: 'circle',
+    source: 'venues',
+    filter: ['!', ['has', 'point_count']],
+    paint: {
+      'circle-color': '#d4a843',
+      'circle-radius': 8,
+      'circle-stroke-width': 2,
+      'circle-stroke-color': '#1a0a2e',
+    }
+  });
+
+  map.on('click', 'unclustered', (e) => {
+    const p = e.features[0].properties;
+    const coords = e.features[0].geometry.coordinates.slice();
+    const cats = Array.isArray(p.categories) ? p.categories : JSON.parse(p.categories || '[]');
+    const catHtml = cats.slice(0, 3).map(c =>
+      `<span class="popup-cat">${c.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>`
+    ).join('');
+    const loc = [p.city, p.state].filter(Boolean).join(', ');
+
+    popupEl
+      .setLngLat(coords)
+      .setHTML(
+        `<p class="popup-name">${p.name}</p>` +
+        (loc ? `<p class="popup-location">${loc}</p>` : '') +
+        (catHtml ? `<div class="popup-cats">${catHtml}</div>` : '') +
+        `<a class="popup-link" href="/venue/${p.slug}">View details &rarr;</a>`
+      )
+      .addTo(map);
+  });
+
+  map.on('click', 'clusters', (e) => {
+    const features = map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
+    const clusterId = features[0].properties.cluster_id;
+    map.getSource('venues').getClusterExpansionZoom(clusterId, (err, zoom) => {
+      if (err) return;
+      map.easeTo({ center: features[0].geometry.coordinates, zoom });
+    });
+  });
+
+  map.on('mouseenter', 'unclustered', () => { map.getCanvas().style.cursor = 'pointer'; });
+  map.on('mouseleave', 'unclustered', () => { map.getCanvas().style.cursor = ''; });
+  map.on('mouseenter', 'clusters', () => { map.getCanvas().style.cursor = 'pointer'; });
+  map.on('mouseleave', 'clusters', () => { map.getCanvas().style.cursor = ''; });
+
+  if (features.length > 0) {
+    const bounds = new mapboxgl.LngLatBounds();
+    features.forEach(f => bounds.extend(f.geometry.coordinates));
+    map.fitBounds(bounds, { padding: 60, maxZoom: 12, animate: false });
+  }
+});
+</script>
+{% endblock %}

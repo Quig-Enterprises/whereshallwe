@@ -3,6 +3,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Request
 
+from app.config import settings
 from app.db import get_pool
 from app.routers.api import _STATE_ABBR
 from app.themes import render
@@ -131,18 +132,27 @@ async def map_page(request: Request):
     venues = []
 
     if pool:
+        extra_col = ", snow_depth_in" if site == "wsws" else ""
         async with pool.acquire() as conn:
             rows = await conn.fetch(
-                f"SELECT id, slug, name, city, state, lat, lng FROM {site}.venues "
+                f"SELECT id, slug, name, city, state, lat, lng, categories{extra_col} "
+                f"FROM {site}.venues "
                 "WHERE status = 'active' AND lat IS NOT NULL AND lng IS NOT NULL"
             )
-        venues = [dict(r) for r in rows]
+        venues = []
+        for r in rows:
+            v = dict(r)
+            v["id"] = str(v["id"])
+            if v.get("lat") is not None:
+                v["lat"] = float(v["lat"])
+            if v.get("lng") is not None:
+                v["lng"] = float(v["lng"])
+            venues.append(v)
 
-    return render(request, "venues.html", {
+    return render(request, "map.html", {
         "venues": venues,
-        "is_map": True,
+        "mapbox_token": settings.MAPBOX_TOKEN,
         "page": "map",
-        "q": None, "city": None, "state": None, "category": None,
     })
 
 
